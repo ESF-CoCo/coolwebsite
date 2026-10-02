@@ -1,0 +1,608 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+.scanner-page {
+  min-height: 100vh;
+  min-height: 100dvh;
+  width: 100%;
+  overflow-x: hidden;
+  background: var(--c-red);
+  color: var(--pure-white);
+  display: flex;
+  flex-direction: column;
+}
+
+.scanner-header {
+  min-height: 72px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 2.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.28);
+}
+
+.back-button {
+  color: inherit;
+  background: transparent;
+  border: 0;
+  font: 500 0.9rem var(--font-main);
+  cursor: pointer;
+  padding: 0.5rem 0;
+}
+
+.back-button span {
+  font-size: 1.35rem;
+  vertical-align: -1px;
+  margin-right: 0.35rem;
+}
+
+.scanner-brand {
+  font-weight: 700;
+  letter-spacing: -0.035em;
+}
+
+.scanner-brand span {
+  font-weight: 400;
+  opacity: 0.65;
+}
+
+.scanner-layout {
+  width: 100%;
+  max-width: 1200px;
+  margin: auto;
+  padding: 3rem 2.5rem;
+  display: grid;
+  grid-template-columns: minmax(0, 0.75fr) minmax(0, 1.25fr);
+  gap: clamp(2rem, 6vw, 9rem);
+  align-items: center;
+  /* Defensive: prevent any child's intrinsic size from overflowing the
+     viewport. Together with minmax(0, 1fr) on the columns below, this
+     stops the scanner shell from being wider than the screen. */
+  overflow: hidden;
+}
+
+.eyebrow {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.scanner-intro h1 {
+  font-size: clamp(3.5rem, 8vw, 7.5rem);
+  line-height: 0.82;
+  letter-spacing: -0.08em;
+  margin: 1.25rem 0 1.8rem;
+}
+
+.scanner-copy {
+  line-height: 1.55;
+  max-width: 23rem;
+}
+
+.scan-steps {
+  list-style: none;
+  margin-top: 3rem;
+}
+
+.scan-steps li {
+  padding: 0.75rem 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.28);
+  font-size: 0.88rem;
+}
+
+.scan-steps span {
+  margin-right: 1rem;
+  opacity: 0.6;
+  font-size: 0.7rem;
+}
+
+.scanner-workspace {
+  width: 100%;
+  max-width: 540px;
+  margin: 0 auto;
+  /* Critical: min-width: 0 lets this grid/flex child shrink below its
+     content's intrinsic size. Without it, aspect-ratio + min-height on
+     the shell forces the workspace (and its grid cell) to overflow. */
+  min-width: 0;
+}
+
+/* The shell defines the aspect ratio and clips the video. No padding here
+   — the video fills it edge-to-edge. */
+.camera-shell {
+  position: relative;
+  width: 100%;
+  aspect-ratio: var(--camera-aspect-ratio, 4 / 3);
+  max-height: 60vh;
+  background: #000;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+@media (min-width: 801px) {
+  .camera-shell {
+    max-height: none;
+  }
+}
+
+/* React-managed host. Fills the shell exactly. */
+.qr-reader-host {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* The scanner container is created via document.createElement() in
+   ScannerCamera.jsx. Fills the host exactly. */
+.qr-reader {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* html5-qrcode injects its own scan-region overlay as direct <div> children
+   of the container when the video is active. Hide every direct div child;
+   we draw our own corners. The <video> and <canvas> elements remain. */
+.qr-reader > div {
+  display: none !important;
+}
+
+.qr-reader video {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: center center !important;
+  transform: none !important;
+  display: block;
+}
+
+.qr-reader canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  opacity: 0.001;
+  pointer-events: none;
+}
+
+#qr-reader__dashboard {
+  display: none !important;
+}
+
+/* Corner brackets. One rule set, positioned relative to .qr-reader-host
+   so they frame the video exactly. */
+.camera-corners {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.camera-corners b {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  border-color: var(--pure-white);
+  border-style: solid;
+}
+
+.camera-corners b:nth-child(1) {
+  left: 20px;
+  top: 20px;
+  border-width: 3px 0 0 3px;
+}
+
+.camera-corners b:nth-child(2) {
+  right: 20px;
+  top: 20px;
+  border-width: 3px 3px 0 0;
+}
+
+.camera-corners b:nth-child(3) {
+  left: 20px;
+  bottom: 20px;
+  border-width: 0 0 3px 3px;
+}
+
+.camera-corners b:nth-child(4) {
+  right: 20px;
+  bottom: 20px;
+  border-width: 0 3px 3px 0;
+}
+
+.scan-line {
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.45);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.25);
+  animation: scan 3s ease-in-out infinite alternate;
+  z-index: 3;
+  pointer-events: none;
+}
+
+@keyframes scan {
+  from {
+    top: 18%;
+  }
+  to {
+    top: 82%;
+  }
+}
+
+.scan-feedback {
+  min-height: 100px;
+  background: var(--pure-white);
+  color: var(--c-dark);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.15rem 1.3rem;
+}
+
+.feedback-mark {
+  flex: 0 0 31px;
+  height: 31px;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+}
+
+.scan-feedback strong {
+  display: block;
+  font-size: 1rem;
+}
+
+.scan-feedback p {
+  font-size: 0.82rem;
+  line-height: 1.35;
+  opacity: 0.67;
+  margin-top: 0.2rem;
+}
+
+.scan-feedback.is-success {
+  background: #b5ff4d;
+}
+
+.scan-feedback.is-error,
+.scan-feedback.is-camera-error {
+  background: var(--c-yellow);
+}
+
+.scan-feedback button {
+  color: var(--pure-white);
+  background: var(--c-dark);
+  border: 0;
+  margin-left: auto;
+  padding: 0.65rem 0.85rem;
+  white-space: nowrap;
+  font: 600 0.72rem var(--font-main);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+
+.scanner-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 20px;
+  height: 20px;
+  background: var(--pure-white);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  mix-blend-mode: difference;
+  opacity: 0;
+  will-change: transform, opacity;
+  transition: opacity 120ms ease;
+}
+
+.scanner-cursor.is-visible {
+  opacity: 1;
+}
+
+@media (pointer: fine) {
+  .dynamic-viewport.custom-cursor-active,
+  .dynamic-viewport.custom-cursor-active *,
+  .scanner-page:has(.scanner-cursor.is-visible),
+  .scanner-page:has(.scanner-cursor.is-visible) * {
+    cursor: none !important;
+  }
+}
+
+@media (pointer: coarse) {
+  .scanner-cursor {
+    display: none;
+  }
+}
+
+@media (max-width: 800px) {
+  .scanner-header {
+    min-height: 60px;
+    padding: 0 1.25rem;
+  }
+  .scanner-brand {
+    display: none;
+  }
+  .scanner-layout {
+    /* minmax(0, 1fr) is important: plain 1fr allows the cell to grow to
+       fit its content's intrinsic size, which the aspect-ratio'd shell
+       can make very wide. minmax(0, 1fr) clamps the cell to the
+       available space. */
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2rem;
+    padding: 2rem 1.25rem;
+    align-items: start;
+  }
+  .scanner-intro h1 {
+    font-size: 4rem;
+  }
+  .scan-steps {
+    display: none;
+  }
+  .scanner-workspace {
+    width: 100%;
+    max-width: 100%;
+  }
+  .camera-shell {
+    /* Remove min-height on mobile — it was forcing the shell wider than
+       the viewport. The shell's height now derives purely from its width
+       and the camera's aspect ratio, which is always <= viewport width. */
+    min-height: 0;
+    max-height: none;
+  }
+  .camera-corners b {
+    width: 24px;
+    height: 24px;
+  }
+  .camera-corners b:nth-child(1),
+  .camera-corners b:nth-child(3) {
+    left: 12px;
+  }
+  .camera-corners b:nth-child(2),
+  .camera-corners b:nth-child(4) {
+    right: 12px;
+  }
+  .camera-corners b:nth-child(1),
+  .camera-corners b:nth-child(2) {
+    top: 12px;
+  }
+  .camera-corners b:nth-child(3),
+  .camera-corners b:nth-child(4) {
+    bottom: 12px;
+  }
+}
+
+/* --- staff action controls --- */
+.staff-action-panel,
+.challenge-card,
+.participant-result-card {
+  margin-top: 1rem;
+  padding: 1rem 1.1rem;
+  background: rgba(255, 255, 255, 0.96);
+  color: var(--c-dark);
+}
+
+.staff-participant-meta,
+.challenge-meta,
+.lunch-control {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.staff-action-label {
+  display: block;
+  font-size: 0.63rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  opacity: 0.58;
+  margin-bottom: 0.2rem;
+}
+
+.staff-participant-meta strong {
+  font-size: 1.35rem;
+  letter-spacing: -0.04em;
+}
+
+.lunch-control {
+  margin-top: 1rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid rgba(68, 71, 86, 0.12);
+}
+
+.portion-count {
+  display: block;
+  font-size: 2rem;
+  line-height: 1;
+  letter-spacing: -0.06em;
+}
+
+.portion-buttons {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.portion-buttons button,
+.staff-depart-button,
+.staff-next-button,
+.scan-reset-button,
+.challenge-submit {
+  border: 0;
+  padding: 0.75rem 0.9rem;
+  font: 700 0.7rem var(--font-main);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+}
+
+.portion-buttons button {
+  min-width: 44px;
+  background: var(--c-dark);
+  color: var(--pure-white);
+}
+
+.portion-buttons .portion-add {
+  min-width: 58px;
+  background: var(--c-yellow);
+  color: var(--c-dark);
+}
+
+.staff-depart-button {
+  width: 100%;
+  margin-top: 0.85rem;
+  background: var(--c-red);
+  color: var(--pure-white);
+}
+
+.staff-depart-button.is-done {
+  background: #b5ff4d;
+  color: var(--c-dark);
+}
+
+.staff-depart-button:disabled,
+.portion-buttons button:disabled,
+.challenge-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.staff-next-button,
+.scan-reset-button {
+  width: 100%;
+  margin-top: 0.55rem;
+  background: var(--c-dark);
+  color: var(--pure-white);
+}
+
+.action-success {
+  margin: 0.65rem 0 0;
+  font-size: 0.72rem;
+  opacity: 0.7;
+}
+
+.participant-scanner-page {
+  background: var(--c-blue);
+}
+
+.challenge-card h2 {
+  margin: 0.85rem 0 1rem;
+  font-size: clamp(1.25rem, 2vw, 1.8rem);
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+}
+
+.challenge-meta strong {
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+}
+
+.challenge-options {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.challenge-options button {
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  align-items: center;
+  gap: 0.7rem;
+  text-align: left;
+  border: 1px solid rgba(68, 71, 86, 0.18);
+  background: transparent;
+  color: var(--c-dark);
+  padding: 0.75rem;
+  font: 600 0.82rem var(--font-main);
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.challenge-options button span {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border: 1px solid currentColor;
+  font-size: 0.68rem;
+}
+
+.challenge-options button.selected {
+  background: var(--c-blue);
+  color: var(--pure-white);
+  border-color: var(--c-blue);
+}
+
+.challenge-submit {
+  width: 100%;
+  margin-top: 0.85rem;
+  background: var(--c-yellow);
+  color: var(--c-dark);
+}
+
+.participant-result-card {
+  text-align: center;
+}
+
+.participant-result-card > strong {
+  display: block;
+  font-size: 0.72rem;
+  letter-spacing: 0.17em;
+  text-transform: uppercase;
+  opacity: 0.6;
+}
+
+.participant-result-xp {
+  margin-top: 0.15rem;
+  font-size: 3rem;
+  font-weight: 700;
+  letter-spacing: -0.07em;
+}
+
+.participant-result-card p {
+  margin: 0.25rem 0;
+  font-size: 0.86rem;
+}
+
+.participant-result-card small {
+  display: block;
+  font-size: 0.62rem;
+  letter-spacing: 0.15em;
+  opacity: 0.55;
+}
+
+.leaderboard-updated {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  opacity: 0.55;
+}
+
+.leaderboard-status {
+  padding: 1.5rem 0;
+  opacity: 0.7;
+}
+
+@media (max-width: 800px) {
+  .staff-participant-meta strong {
+    font-size: 1.15rem;
+  }
+
+  .staff-action-panel,
+  .challenge-card,
+  .participant-result-card {
+    margin-top: 0.75rem;
+  }
+}

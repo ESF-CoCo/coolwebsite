@@ -1,0 +1,11 @@
+/*
+ * This file intentionally contains no scanner-related rules.
+ *
+ * All scanner styling (.camera-shell, .qr-reader-host, .qr-reader,
+ * .camera-corners, .scan-line) lives in scan.css. Duplicating any of it
+ * here causes the styles to stack — e.g. two .camera-corners rules
+ * produce double white frames around the viewfinder.
+ *
+ * If you need mobile-specific scan tweaks, add them to scan.css inside the
+ * existing @media (max-width: 800px) block.
+ */
