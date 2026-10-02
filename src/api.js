@@ -1,5 +1,5 @@
 export const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "https://coconut.valentinabanner.com";
+  import.meta.env.VITE_API_URL || "https://coconawada.valentinabanner.com";
 
 const AUTH_PATHS_WITHOUT_REFRESH = [
   "/api/v1/auth/login",
